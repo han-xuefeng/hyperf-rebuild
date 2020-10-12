@@ -13,7 +13,7 @@ return [
             'port' => 9501,
             'sock_type' => SWOOLE_SOCK_TCP,
             'callbacks' => [
-                'request' => [Hyperf\HttpServer\Server::class, 'onRequest'],
+                'request' => [Rebuild\HttpServer\Server::class, 'onRequest'],
             ],
         ]
     ],
