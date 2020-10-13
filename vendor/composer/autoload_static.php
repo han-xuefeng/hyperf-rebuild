@@ -39,6 +39,7 @@ class ComposerStaticInit0c99f0f3fb48d6949050f757a3a1c83c
         ),
         'P' => 
         array (
+            'Psr\\Http\\Server\\' => 16,
             'Psr\\Http\\Message\\' => 17,
             'Psr\\Container\\' => 14,
         ),
@@ -112,6 +113,11 @@ class ComposerStaticInit0c99f0f3fb48d6949050f757a3a1c83c
         'Rebuild\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
+        ),
+        'Psr\\Http\\Server\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/http-server-handler/src',
+            1 => __DIR__ . '/..' . '/psr/http-server-middleware/src',
         ),
         'Psr\\Http\\Message\\' => 
         array (

@@ -2,6 +2,7 @@
 
 namespace Rebuild\HttpServer;
 
+use Hyperf\HttpMessage\Server\Request;
 use Hyperf\HttpMessage\Server\Request as Psr7Request;
 use Hyperf\HttpMessage\Server\Response as Psr7Response;
 use Hyperf\Utils\Context;
@@ -17,9 +18,15 @@ class Server
      */
     protected $dispatcher;
 
+    /**
+     * @var CoreMiddleware
+     */
+    protected $coreMiddleware;
+
     public function __construct(DispatcherFactory $dispatcherFactory)
     {
         $this->dispatcher = $dispatcherFactory->getDispatcher('http');
+        $this->coreMiddleware = new CoreMiddleware($dispatcherFactory);
     }
 
     public function onRequest($request, $response)
@@ -28,8 +35,9 @@ class Server
          * @var \Hyperf\HttpMessage\Server\Request $psr7Request
          * @var \Hyperf\HttpMessage\Server\Response $psr7Response
          */
-        [$psr7Request, ] = $this->initRequestAndResponse($request, $response);
-
+        [$psr7Request, $psr7Response] = $this->initRequestAndResponse($request, $response);
+        //中间件  todo
+//        $psr7Request = $this->coreMiddleware->dispatch($psr7Request);
 
         $routeInfo = $this->dispatcher->dispatch($psr7Request->getMethod(), $psr7Request->getUri()->getPath());
         switch ($routeInfo[0]) {
