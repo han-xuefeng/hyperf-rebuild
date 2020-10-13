@@ -4,11 +4,13 @@
 namespace Rebuild\Server;
 
 
+use Rebuild\HttpServer\Router\DispatcherFactory;
+
 class Server implements ServerInterface
 {
 
     /**
-     * @var SwooleServer
+     * @var \Swoole\Http\Server
      */
     protected $server;
 
@@ -50,12 +52,17 @@ class Server implements ServerInterface
 
     /**
      * 注册回调事假
+     * @param array $callbacks
      */
     public function registerSwooleEvents(array $callbacks)
     {
         foreach ($callbacks as $swooleEvent => $callback) {
             [$class, $method] = $callback;
-            $instance = new $class;
+            if ($class === \Rebuild\HttpServer\Server::class) {
+                $instance = new $class(new DispatcherFactory());
+            } else {
+                $instance = new $class;
+            }
             $this->server->on($swooleEvent,[$instance, $method]);
         }
 

@@ -16,6 +16,7 @@ class ComposerStaticInit0c99f0f3fb48d6949050f757a3a1c83c
         'bbeb7603826cb9296dde3ca1a840af47' => __DIR__ . '/..' . '/hyperf/utils/src/Functions.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
+        '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -52,6 +53,10 @@ class ComposerStaticInit0c99f0f3fb48d6949050f757a3a1c83c
             'Hyperf\\Utils\\' => 13,
             'Hyperf\\HttpMessage\\' => 19,
             'Hyperf\\Contract\\' => 16,
+        ),
+        'F' => 
+        array (
+            'FastRoute\\' => 10,
         ),
         'D' => 
         array (
@@ -139,6 +144,10 @@ class ComposerStaticInit0c99f0f3fb48d6949050f757a3a1c83c
         'Hyperf\\Contract\\' => 
         array (
             0 => __DIR__ . '/..' . '/hyperf/contract/src',
+        ),
+        'FastRoute\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/nikic/fast-route/src',
         ),
         'Doctrine\\Inflector\\' => 
         array (

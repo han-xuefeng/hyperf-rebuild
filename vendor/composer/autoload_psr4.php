@@ -25,6 +25,7 @@ return array(
     'Hyperf\\Utils\\' => array($vendorDir . '/hyperf/utils/src'),
     'Hyperf\\HttpMessage\\' => array($vendorDir . '/hyperf/http-message/src'),
     'Hyperf\\Contract\\' => array($vendorDir . '/hyperf/contract/src'),
+    'FastRoute\\' => array($vendorDir . '/nikic/fast-route/src'),
     'Doctrine\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib/Doctrine/Inflector'),
     'App\\' => array($baseDir . '/app'),
 );
