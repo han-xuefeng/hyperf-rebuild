@@ -2,14 +2,17 @@
 
 namespace Rebuild\HttpServer;
 
-use Hyperf\HttpMessage\Server\Request;
 use Hyperf\HttpMessage\Server\Request as Psr7Request;
 use Hyperf\HttpMessage\Server\Response as Psr7Response;
 use Hyperf\Utils\Context;
+use Psr\Http\Message\ResponseInterface;
+use Rebuild\Config\ConfigFactory;
+use Rebuild\Dispatcher\HttpRequestHandler;
+use Rebuild\HttpServer\Router\Dispatched;
 use Rebuild\HttpServer\Router\DispatcherFactory;
 use Swoole\Http\Request as SwooleRequest;
 use Swoole\Http\Response as SwooleResponse;
-use FastRoute\Dispatcher;
+use Psr\Http\Message\ServerRequestInterface;
 
 class Server
 {
@@ -23,10 +26,27 @@ class Server
      */
     protected $coreMiddleware;
 
+    /**
+     * @var DispatcherFactory
+     */
+    protected $dispatcherFactory;
+
+    /**
+     * @var array
+     */
+    protected $globalMiddlewares = [];
+
     public function __construct(DispatcherFactory $dispatcherFactory)
     {
-        $this->dispatcher = $dispatcherFactory->getDispatcher('http');
-        $this->coreMiddleware = new CoreMiddleware($dispatcherFactory);
+        $this->dispatcherFactory = $dispatcherFactory;
+        $this->dispatcher = $this->dispatcherFactory->getDispatcher('http');
+    }
+
+    public function initCoreMiddleware()
+    {
+        $this->coreMiddleware = new CoreMiddleware($this->dispatcherFactory);
+        $config = (new ConfigFactory())();
+        $this->globalMiddlewares = $config->get('middlewares');
     }
 
     public function onRequest($request, $response)
@@ -36,29 +56,27 @@ class Server
          * @var \Hyperf\HttpMessage\Server\Response $psr7Response
          */
         [$psr7Request, $psr7Response] = $this->initRequestAndResponse($request, $response);
-        //中间件  todo
-//        $psr7Request = $this->coreMiddleware->dispatch($psr7Request);
 
-        $routeInfo = $this->dispatcher->dispatch($psr7Request->getMethod(), $psr7Request->getUri()->getPath());
-        switch ($routeInfo[0]) {
-            case Dispatcher::NOT_FOUND:
-                $response->status(404);
-                $response->end('Not Found');
-                break;
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                $allowMethods = $routeInfo[1];
-                $response->status(405);
-                $response->header('Method-Allows',implode(',', $allowMethods));
-                break;
-            case Dispatcher::FOUND:
-                $handler = $routeInfo[1];
-                $vars = $routeInfo[2];
-                [$controller, $action] = $handler;
-                $instance = new $controller();
-                $result = $instance->$action(...$vars);
-                $response->end($result);
-                break;
+        $psr7Request = $this->coreMiddleware->dispatch($psr7Request);
+
+        $method = $psr7Request->getMethod();
+        $path = $psr7Request->getUri()->getPath();
+
+        $middlewares = $this->globalMiddlewares;
+
+        $dispatched = $psr7Request->getAttribute(Dispatched::class);
+        if ($dispatched instanceof Dispatched && $dispatched->isFound()) {
+            $registerMiddlewares = MiddlewareManger::get($path, $method);
+            $middlewares = array_merge($middlewares, $registerMiddlewares);
         }
+
+        $requestHandle = new HttpRequestHandler($middlewares, $this->coreMiddleware);
+
+        $psr7Response = $requestHandle->handle($psr7Request);
+        foreach ($psr7Response->getHeaders() as $key => $value) {
+            $response->header($key, implode(';', $value));
+        }
+        $response->end($psr7Response->getBody()->getContents());
     }
 
     /**

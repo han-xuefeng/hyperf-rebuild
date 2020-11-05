@@ -7,6 +7,7 @@ use FastRoute\DataGenerator\GroupCountBased as DataGenerator;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use FastRoute\RouteParser\Std;
+use Rebuild\HttpServer\MiddlewareManger;
 use function FastRoute\simpleDispatcher;
 
 class DispatcherFactory
@@ -39,7 +40,16 @@ class DispatcherFactory
             $this->dispatcher[$serverName] = simpleDispatcher(function (RouteCollector $r) {
                 foreach ($this->routes as $route) {
                     [$method, $path, $handle] = $route;
+
                     $r->addRoute($method, $path, $handle);
+
+                    if (isset($route[3])){
+                        $options = $route[3];
+                    }
+
+                    if (isset($options['middlewares']) && is_array($options['middlewares'])) {
+                        MiddlewareManger::addMiddlewares($path, $method, $options['middlewares']);
+                    }
                 }
             });
         }
